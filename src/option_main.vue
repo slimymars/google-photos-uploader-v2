@@ -1,18 +1,22 @@
 <template>
-    <button @click="onClick">{{ msg }}</button>
+    <div id="options">
+        <GooglePhotosAlbumList></GooglePhotosAlbumList>
+    </div>
 </template>
 
 <script lang="ts">
-    import {Component, Vue} from 'vue-property-decorator';
+    import GooglePhotosAlbumList from './google-photos-album.vue';
+    import {Vue, Component} from 'vue-property-decorator';
 
-    @Component
+    @Component({
+        components: {
+            GooglePhotosAlbumList
+        },
+    })
     export default class Options extends Vue {
-        public msg: string = 'test msg';
 
-        public onClick(): void {
-            this.msg = 'change msg';
-        }
     }
+
 </script>
 
 <style>

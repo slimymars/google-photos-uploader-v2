@@ -19,7 +19,7 @@
   "oauth2": {
     "client_id": "843236014371-l7nh89oi2qg94018tfj4se77ojuu8rpf.apps.googleusercontent.com",
     "scopes": [
-      "http://picasaweb.google.com/data/"
+      "https://www.googleapis.com/auth/photoslibrary.readonly"
     ]
   },
   "options_page": "options.html",

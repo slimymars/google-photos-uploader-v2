@@ -2,7 +2,9 @@
     <div id="google_photos">
         <button @click="onClick">Get Album List</button>
         <ul>
-            <li v-for="album in albumList" :id="album.id">{{album.title}}</li>
+            <li v-for="album in albumList" :id="album.id">{{album.title}}
+                <button @click="addBtn(album.id, album.title)">Add</button>
+            </li>
         </ul>
     </div>
 </template>
@@ -52,6 +54,11 @@
                 nextPageToken = json_data.hasOwnProperty('nextPageToken') ? json_data.nextPageToken : '';
             } while (nextPageToken !== '');
         }
+
+        public addBtn(id: string, title: string) {
+            this.$emit('add-btn', {id: id, title: title})
+        }
+
     }
 </script>
 

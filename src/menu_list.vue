@@ -15,6 +15,7 @@
 
 <script lang="ts">
     import {Vue, Component} from 'vue-property-decorator';
+    import ChromeMenu from "./chrome_menu";
 
     interface MenuItem {
         id: string;
@@ -73,6 +74,7 @@
                 this.saveBrnDisabled = false;
                 this.clearBtnDisabled = false;
                 this.pushMsg("保存しました");
+                ChromeMenu.makeMenu(this.list).then(() => this.pushMsg("メニューを更新しました"));
             })
         }
 

@@ -4,7 +4,7 @@
         <label for="album-selector">アルバムリスト：</label>
         <select v-model="selected" v-bind:disabled="albumListDisabled" id="album-selector">
             <option disabled :value="''">{{ msg }}</option>
-            <option v-for="album in albumList" :value="{id: album.title, title: album.title}">{{ album.title}}</option>
+            <option v-for="album in albumList" :value="{id: album.id, title: album.title}">{{ album.title}}</option>
         </select>
         <button @click="addBtn" v-bind:disabled="addBtnDisabled">追加</button>
     </div>

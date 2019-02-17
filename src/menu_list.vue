@@ -15,12 +15,7 @@
 
 <script lang="ts">
     import {Vue, Component} from 'vue-property-decorator';
-    import ChromeMenu from "./chrome_menu";
-
-    interface MenuItem {
-        id: string;
-        title: string;
-    }
+    import {ChromeMenu, MenuItem} from "./chrome_menu";
 
     @Component
     export default class MenuList extends Vue {
@@ -31,16 +26,10 @@
         private msgClearTimeoutId: number | null = null;
         public debugState = false;
 
-        private getChromeMenu(): Promise<MenuItem[]> {
-            return new Promise<{ [key: string]: object }>((resolve) => {
-                // noinspection TypeScriptUnresolvedFunction
-                chrome.storage.local.get('menuItem', resolve)
-            }).then((item) => item['menuItem']).then(obj => obj === undefined ? [] : <MenuItem[]>obj)
-        }
 
         constructor() {
             super();
-            this.getChromeMenu().then((result) => {
+            ChromeMenu.getChromeMenu().then((result) => {
                 result.forEach((i) => this.list.push(i));
             })
         }

@@ -7,6 +7,12 @@
             <option v-for="album in albumList" :value="{id: album.id, title: album.title}">{{ album.title}}</option>
         </select>
         <button @click="addBtn" v-bind:disabled="addBtnDisabled">追加</button>
+        <br>
+        <input v-model="newAlbumName" placeholder="新規アルバム名">
+        <button @click="makeNewAlbumBtn" v-bind:disabled="newAlbumBtnDisabled">新規アルバム作成</button>
+        <br>
+        <button @click="authClearBtn" v-bind:disabled="authClearBtnDisabled">認証情報クリア</button>
+        {{ debugMsg }}
     </div>
 </template>
 
@@ -25,21 +31,32 @@
         addBtnDisabled = true;
         albumListDisabled = true;
         albumBtnMsg = "アルバムリスト取得";
+        newAlbumBtnDisabled = false;
+        newAlbumName = '';
+        debugMsg = '';
+        authClearBtnDisabled = false;
 
-
+        public async makeNewAlbumBtn() {
+            this.newAlbumBtnDisabled = true;
+            const token = await ChromeMenu.getToken();
+            const newData = await GooglePhotos.createAlbum(token, this.newAlbumName);
+            this.albumList.push({id: newData.id, title: newData.title});
+            this.newAlbumBtnDisabled = false;
+        }
         public async onClick() {
             this.albumBtnDisabled = true;
             this.albumBtnMsg = "取得中";
             this.selected = '';
             this.albumListDisabled = true;
             this.addBtnDisabled = true;
+
             this.albumList = [];
             const token = await ChromeMenu.getToken();
             // ToDo: このあたりgoogle-photos.tsに移動したいけど、this.albumList.pushをうまいことする方法がわからん
             let nextPageToken = '';
             do {
                 const json_data = await GooglePhotos.getAlbumJson(token, nextPageToken);
-                // console.log(json_data);
+                // this.debugMsg = this.debugMsg + JSON.stringify(json_data);
                 json_data.albums.forEach(value => this.albumList.push({id: value.id, title: value.title}));
                 nextPageToken = json_data.hasOwnProperty('nextPageToken') ? json_data.nextPageToken : '';
             } while (nextPageToken !== '');
@@ -56,6 +73,11 @@
             } else {
                 this.$emit('add-btn', this.selected)
             }
+        }
+
+        public authClearBtn() {
+            this.authClearBtnDisabled = true;
+            ChromeMenu.authClear().then(() => this.authClearBtnDisabled = false)
         }
 
     }

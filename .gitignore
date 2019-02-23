@@ -2,3 +2,4 @@ node_modules/
 dist/
 
 .idea/
+/src/client_secret.json

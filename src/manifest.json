@@ -17,9 +17,9 @@
     "https://*/*"
   ],
   "oauth2": {
-    "client_id": "843236014371-l7nh89oi2qg94018tfj4se77ojuu8rpf.apps.googleusercontent.com",
+    "client_id": "843236014371-1db3s8tp7bc0gllugkdi9q2l3it8rdjo.apps.googleusercontent.com",
     "scopes": [
-      "https://www.googleapis.com/auth/photoslibrary.readonly"
+      "https://www.googleapis.com/auth/photoslibrary"
     ]
   },
   "options_page": "options.html",

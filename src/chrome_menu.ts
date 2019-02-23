@@ -1,3 +1,5 @@
+import Oauth2 from './oauth';
+
 export class ChromeMenu {
     static readonly ID_HEADER = 'google-photos-uploader-';
     static readonly ROOT_ITEM_ID = ChromeMenu.ID_HEADER + 'root';
@@ -46,19 +48,29 @@ export class ChromeMenu {
         return menuId.slice(this.ID_HEADER.length)
     }
 
+    static localStorageGet(key: string): Promise<any> {
+        return new Promise<any>(resolve => chrome.storage.local.get(key, resolve))
+            .then(obj => obj[key])
+    }
+
     static getChromeMenu(): Promise<MenuItem[]> {
-        return new Promise<{ [key: string]: object }>((resolve) => {
-            // noinspection TypeScriptUnresolvedFunction
-            chrome.storage.local.get('menuItem', resolve)
-        }).then((item) => item['menuItem']).then(obj => obj === undefined ? [] : <MenuItem[]>obj)
+        return this.localStorageGet('menuItem')
+            .then(obj => obj === undefined ? [] : <MenuItem[]>obj)
+    }
+
+    static saveAuthInfo(authInfo: any): Promise<typeof authInfo> {
+        return new Promise<typeof authInfo>(resolve => {
+            chrome.storage.local.set({'authInfo': authInfo}, () => resolve(authInfo))
+        })
+    }
+
+    static authClear(): Promise<void> {
+        return new Promise<void>(resolve => chrome.storage.local.remove('authInfo', resolve))
     }
 
     static getToken(): Promise<string> {
-        return new Promise<string>((resolve: (value?: string) => void) => {
-            chrome.identity.getAuthToken({interactive: true}, token => {
-                resolve(token)
-            })
-        });
+        return this.localStorageGet('authInfo')
+            .then(obj => Oauth2.getAccessToken(obj, ChromeMenu.saveAuthInfo));
     }
 
     static addListener(resolv: (albumId: string, imageUrl: string) => void) {

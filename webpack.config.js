@@ -48,6 +48,10 @@ module.exports = {
                 {
                     from: path.join(__dirname, 'src', 'options.html'),
                     to: path.join(__dirname, 'dist')
+                },
+                {
+                    from: path.join(__dirname, 'src', 'client_secret.json'),
+                    to: path.join(__dirname, 'dist')
                 }
             ]
         )

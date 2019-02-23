@@ -32,7 +32,6 @@ export default class OAuth2 {
         return `https://accounts.google.com/o/oauth2/auth\
 ?client_id=${s.web.client_id}\
 &response_type=code\
-&access_type=offline\
 &redirect_uri=${encodeURIComponent(OAuth2.REDIRECT_URL)}\
 &scope=${encodeURIComponent(m.oauth2.scopes.join(' '))}`;
     }
@@ -47,7 +46,7 @@ export default class OAuth2 {
         return params.get("code");
     }
 
-    private authorize(): Promise<AuthInfo> {
+    private authorize(): Promise<string> {
         const authUrl = this.getAuthUrl();
         return new Promise<string>(resolve => {
             chrome.identity.launchWebAuthFlow({
@@ -61,54 +60,23 @@ export default class OAuth2 {
                 console.log('redirectURL err', redirectURL);
                 throw "Authorization failure";
             }
-            if (!this.clientSecret) throw 'client secret undefined';
-            const s = this.clientSecret;
-            let respTime: number;
-            const params = new URLSearchParams();
-            params.append('code', code);
-            params.append('client_id', s.web.client_id);
-            params.append('client_secret', s.web.client_secret);
-            params.append('redirect_uri', OAuth2.REDIRECT_URL);
-            params.append('grant_type', 'authorization_code');
-            return fetch(OAuth2.VALIDATION_BASE_URL, {
-                method: "POST",
-                body: params,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            }).then((resp) => {
-                if (resp.ok) {
-                    respTime = Date.now();
-                    return resp.json();
-                }
-                resp.json().then(d => console.log('get token err', d));
-                throw 'get token err'
-            }).then(data => {
-                if (isAuthResp(data) === false) {
-                    console.log('get token err json', data);
-                    throw 'get token err';
-                }
-                return <AuthInfo>{
-                    access_token: data.access_token,
-                    token_type: data.token_type,
-                    refresh_token: data.refresh_token,
-                    expiration: respTime + data.expires_in * 1000
-                }
-            });
+            return code;
         });
     }
 
-    private refreshToken(authInfo: AuthInfo): Promise<AuthInfo> {
-        let respTime: number;
+
+    private getAccessToken(authInfoOrCode: string | AuthInfo): Promise<AuthInfo> {
+        const code = typeof authInfoOrCode === 'string' ? authInfoOrCode : authInfoOrCode.code;
+        if (!this.clientSecret) throw 'client secret undefined';
         const s = this.clientSecret;
-        if (!s) throw 'client secret undefined';
+        let respTime: number;
         const params = new URLSearchParams();
+        params.append('code', code);
         params.append('client_id', s.web.client_id);
         params.append('client_secret', s.web.client_secret);
-        params.append('refresh_token', authInfo.refresh_token);
-        params.append('grant_type', 'refresh_token');
-        const validationURL = OAuth2.VALIDATION_BASE_URL;
-        return fetch(validationURL, {
+        params.append('redirect_uri', OAuth2.REDIRECT_URL);
+        params.append('grant_type', 'authorization_code');
+        return fetch(OAuth2.VALIDATION_BASE_URL, {
             method: "POST",
             body: params,
             headers: {
@@ -119,17 +87,18 @@ export default class OAuth2 {
                 respTime = Date.now();
                 return resp.json();
             }
-            resp.json().then(d => console.log('refresh token err', d));
-            throw 'refresh token err'
+            resp.json().then(d => console.log('get token err', d));
+            throw 'get token err'
         }).then(data => {
             if (isAuthResp(data) === false) {
                 console.log('get token err json', data);
                 throw 'get token err';
             }
+            // console.log('auth response data', data);
             return <AuthInfo>{
+                code: code,
                 access_token: data.access_token,
                 token_type: data.token_type,
-                refresh_token: authInfo.refresh_token,
                 expiration: respTime + data.expires_in * 1000
             }
         });
@@ -141,14 +110,12 @@ export default class OAuth2 {
     }
 
     public static getAccessToken(authInfo: AuthInfo | undefined, newAuthSaveFunc: (arg: AuthInfo) => Promise<AuthInfo>): Promise<string> {
+        // console.log("auth info", authInfo);
         const me = this.getInstance();
-        if (authInfo === undefined) {
-            return me.loadClientSecret().then(() => me.authorize()).then(newAuthSaveFunc).then(auth => auth.access_token)
-        }
-        if (authInfo.expiration > Date.now()) {
+        if (authInfo !== undefined && authInfo.expiration > Date.now()) {
             return Promise.resolve(authInfo.access_token)
         }
-        return me.loadClientSecret().then(() => me.refreshToken(authInfo)).then(newAuthSaveFunc).then(auth => auth.access_token)
+        return me.loadClientSecret().then(() => me.authorize()).then((code) => me.getAccessToken(code)).then(newAuthSaveFunc).then(auth => auth.access_token)
     }
 }
 
@@ -156,14 +123,13 @@ export interface AuthInfo {
     access_token: string;
     expiration: number;
     token_type: string;
-    refresh_token: string;
+    code: string;
 }
 
 interface AuthResp {
     "access_token": string;
     "expires_in": number;
     "token_type": 'Bearer';
-    "refresh_token": string;
 }
 
 function isAuthResp(obj: any): obj is AuthResp {

@@ -4,7 +4,9 @@
         <label for="album-selector">アルバムリスト：</label>
         <select v-model="selected" v-bind:disabled="albumListDisabled" id="album-selector">
             <option disabled :value="''">{{ msg }}</option>
-            <option v-for="album in albumList" :value="{id: album.id, title: album.title}">{{ album.title}}</option>
+            <option v-for="album in albumList" :value="{id: album.id, title: album.title}"
+                    :disabled="!album.isWriteable">{{ album.title}}
+            </option>
         </select>
         <button @click="addBtn" v-bind:disabled="addBtnDisabled">追加</button>
         <br>
@@ -19,14 +21,14 @@
 <script lang="ts">
     import {Component, Vue} from 'vue-property-decorator';
     import {ChromeMenu} from "./chrome_menu";
-    import {GooglePhotos} from "./google-photos";
+    import {AlbumData, GooglePhotos} from "./google-photos";
 
 
     @Component
     export default class GooglePhotosAlbumList extends Vue {
-        public albumList: { id: string; title: string }[] = [];
+        public albumList: AlbumData[] = [];
         public msg = "アルバムリスト取得ボタンで取得してください";
-        public selected: { id: string; title: string } | string = "";
+        public selected: AlbumData | string = "";
         albumBtnDisabled = false;
         addBtnDisabled = true;
         albumListDisabled = true;
@@ -40,7 +42,7 @@
             this.newAlbumBtnDisabled = true;
             const token = await ChromeMenu.getToken();
             const newData = await GooglePhotos.createAlbum(token, this.newAlbumName);
-            this.albumList.push({id: newData.id, title: newData.title});
+            this.albumList.push({id: newData.id, title: newData.title, isWriteable: newData.isWriteable});
             this.newAlbumBtnDisabled = false;
         }
         public async onClick() {
@@ -57,7 +59,10 @@
             do {
                 const json_data = await GooglePhotos.getAlbumJson(token, nextPageToken);
                 // this.debugMsg = this.debugMsg + JSON.stringify(json_data);
-                json_data.albums.forEach(value => this.albumList.push({id: value.id, title: value.title}));
+                json_data.albums.forEach(value => {
+                    const data = <AlbumData>{id: value.id, title: value.title, isWriteable: value.isWriteable};
+                    this.albumList.push(data);
+                });
                 nextPageToken = json_data.hasOwnProperty('nextPageToken') ? json_data.nextPageToken : '';
             } while (nextPageToken !== '');
             this.albumBtnMsg = "アルバムリスト再取得";

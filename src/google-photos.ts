@@ -124,7 +124,6 @@ export class GooglePhotos {
 }
 
 export interface AlbumData {
-    productUrl: string;
     id: string;
     title: string;
     isWriteable: boolean;
@@ -134,6 +133,7 @@ export interface RawAlbumList {
     albums: {
         id: string;
         title: string;
+        isWriteable?: boolean;
     }[];
     nextPageToken: string;
 }

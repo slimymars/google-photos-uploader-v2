@@ -47,55 +47,54 @@ export default class OAuth2 {
         return params.get("code");
     }
 
-    private makeAuthInfo(redirectURL?: string): Promise<AuthInfo> {
-        if (redirectURL === undefined) throw 'Authorization failure: ' + chrome.runtime.lastError;
-        const code = OAuth2.extractCode(redirectURL);
-        if (!code) {
-            console.log('redirectURL err', redirectURL);
-            throw "Authorization failure";
-        }
-        if (!this.clientSecret) throw 'client secret undefined';
-        const s = this.clientSecret;
-        let respTime: number;
-        const params = new URLSearchParams();
-        params.append('code', code);
-        params.append('client_id', s.web.client_id);
-        params.append('client_secret', s.web.client_secret);
-        params.append('redirect_uri', OAuth2.REDIRECT_URL);
-        params.append('grant_type', 'authorization_code');
-        return fetch(OAuth2.VALIDATION_BASE_URL, {
-            method: "POST",
-            body: params,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }).then((resp) => {
-            if (resp.ok) {
-                respTime = Date.now();
-                return resp.json();
-            }
-            resp.json().then(d => console.log('get token err', d));
-            throw 'get token err'
-        }).then(data => {
-            if (isAuthResp(data) === false) {
-                console.log('get token err json', data);
-                throw 'get token err';
-            }
-            return <AuthInfo>{
-                access_token: data.access_token,
-                token_type: data.token_type,
-                refresh_token: data.refresh_token,
-                expiration: respTime + data.expires_in * 1000
-            }
-        });
-    }
-
-    private authorize() {
-        return new Promise<string>((resolve) => {
+    private authorize(): Promise<AuthInfo> {
+        const authUrl = this.getAuthUrl();
+        return new Promise<string>(resolve => {
             chrome.identity.launchWebAuthFlow({
                 interactive: true,
-                url: this.getAuthUrl()
-            }, resolve);
+                url: authUrl
+            }, resolve)
+        }).then((redirectURL) => {
+            if (redirectURL === undefined) throw 'Authorization failure: ' + chrome.runtime.lastError;
+            const code = OAuth2.extractCode(redirectURL);
+            if (!code) {
+                console.log('redirectURL err', redirectURL);
+                throw "Authorization failure";
+            }
+            if (!this.clientSecret) throw 'client secret undefined';
+            const s = this.clientSecret;
+            let respTime: number;
+            const params = new URLSearchParams();
+            params.append('code', code);
+            params.append('client_id', s.web.client_id);
+            params.append('client_secret', s.web.client_secret);
+            params.append('redirect_uri', OAuth2.REDIRECT_URL);
+            params.append('grant_type', 'authorization_code');
+            return fetch(OAuth2.VALIDATION_BASE_URL, {
+                method: "POST",
+                body: params,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }).then((resp) => {
+                if (resp.ok) {
+                    respTime = Date.now();
+                    return resp.json();
+                }
+                resp.json().then(d => console.log('get token err', d));
+                throw 'get token err'
+            }).then(data => {
+                if (isAuthResp(data) === false) {
+                    console.log('get token err json', data);
+                    throw 'get token err';
+                }
+                return <AuthInfo>{
+                    access_token: data.access_token,
+                    token_type: data.token_type,
+                    refresh_token: data.refresh_token,
+                    expiration: respTime + data.expires_in * 1000
+                }
+            });
         });
     }
 
@@ -130,21 +129,26 @@ export default class OAuth2 {
             return <AuthInfo>{
                 access_token: data.access_token,
                 token_type: data.token_type,
-                refresh_token: data.refresh_token,
+                refresh_token: authInfo.refresh_token,
                 expiration: respTime + data.expires_in * 1000
             }
         });
     }
 
-    public static getAccessToken(authInfo: AuthInfo | undefined, newAuthSaveFunc: (arg: AuthInfo) => Promise<AuthInfo>): Promise<string> {
+    private static getInstance(): OAuth2 {
         if (this._me === undefined) this._me = new OAuth2();
+        return this._me;
+    }
+
+    public static getAccessToken(authInfo: AuthInfo | undefined, newAuthSaveFunc: (arg: AuthInfo) => Promise<AuthInfo>): Promise<string> {
+        const me = this.getInstance();
         if (authInfo === undefined) {
-            return this._me.loadClientSecret().then(this._me.authorize).then(this._me.makeAuthInfo).then(newAuthSaveFunc).then(auth => auth.access_token)
+            return me.loadClientSecret().then(() => me.authorize()).then(newAuthSaveFunc).then(auth => auth.access_token)
         }
         if (authInfo.expiration > Date.now()) {
             return Promise.resolve(authInfo.access_token)
         }
-        return this._me.loadClientSecret().then(() => this._me.refreshToken(authInfo)).then(newAuthSaveFunc).then(auth => auth.access_token)
+        return me.loadClientSecret().then(() => me.refreshToken(authInfo)).then(newAuthSaveFunc).then(auth => auth.access_token)
     }
 }
 

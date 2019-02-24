@@ -31,7 +31,15 @@ export class ChromeMenu {
                         parentId: this.ROOT_ITEM_ID
                     }, resolve)
                 })))
-            });
+            })
+            pl.push(new Promise<void>((resolve => {
+                chrome.contextMenus.create({
+                    id: this.ID_HEADER + 'open_menu',
+                    title: "オプションを開く",
+                    contexts: ["image"],
+                    parentId: this.ROOT_ITEM_ID
+                }, resolve)
+            })));
             return Promise.all(pl);
         }).then((() => {
         }))
@@ -73,6 +81,10 @@ export class ChromeMenu {
             .then(obj => Oauth2.getAccessToken(obj, ChromeMenu.saveAuthInfo));
     }
 
+    static openMenu(): void {
+        chrome.tabs.create({'url': 'chrome://extensions/?options=' + chrome.runtime.id});
+    }
+
     static addListener(resolv: (albumId: string, imageUrl: string) => void) {
         chrome.contextMenus.onClicked.addListener((info) => {
             console.log(info);
@@ -80,6 +92,10 @@ export class ChromeMenu {
             if (info.srcUrl === undefined) return;
             const imageUrl = info.srcUrl;
             const albumId = this.menuIdToAlbumId(info.menuItemId);
+            if (albumId === "open_menu") {
+                ChromeMenu.openMenu();
+                return;
+            }
             resolv(albumId, imageUrl);
         })
     }

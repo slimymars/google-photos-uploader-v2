@@ -66,7 +66,6 @@ export class GooglePhotos {
             console.log("upload token", tk);
             uploadToken = tk;
             const upObj = {
-                // ToDo albumIdの指定なしならアップロード可能。
                 "albumId": albumId,
                 "newMediaItems": [
                     {
@@ -114,8 +113,9 @@ export class GooglePhotos {
         }).then(resp => <RawAddItemResponse>resp
         ).then((resp) => {
             const result = resp.newMediaItemResults.filter((data) => data.uploadToken === uploadToken)
-                .find((data) => data.status.message === "OK");
+                .find((data) => data.mediaItem !== undefined);
             if (result === undefined) {
+                console.log("result not valid");
                 console.log(resp);
             }
             return result !== undefined;
@@ -144,5 +144,29 @@ interface RawAddItemResponse {
         status: {
             message: string;
         };
+        mediaItem?: MediaItem;
     }[]
+}
+
+// 必要なもののみ抜粋
+export interface MediaItem {
+    id: string;
+    description: string;
+    productUrl: string;
+    baseUrl: string;
+    mimeType: string;
+    filename: string;
+}
+
+function isMediaItem(obj: any): obj is MediaItem {
+    return obj.hasOwnProperty('id') && obj.hasOwnProperty('description')
+}
+
+interface MediaItemsSearchResp {
+    mediaItems: MediaItem[];
+    nextPageToken?: string;
+}
+
+function isMediaItemsSearchResp(obj: any): obj is MediaItemsSearchResp {
+    return obj.hasOwnProperty('mediaItems')
 }

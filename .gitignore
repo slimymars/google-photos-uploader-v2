@@ -1,5 +1,6 @@
 node_modules/
 dist/
+package.zip
 
 .idea/
 /src/client_secret.json

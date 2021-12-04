@@ -22,6 +22,80 @@ export class GooglePhotos {
         });
     }
 
+    static getItemListInAlbumOnePage(auth_token: string, albumId: string, nextPageToken?: string): Promise<MediaItemsSearchResp> {
+        const url = 'https://photoslibrary.googleapis.com/v1/mediaItems:search';
+        let body: { 'albumId': string; 'pageToken'?: string; 'pageSize': number } = {
+            "albumId": albumId,
+            'pageSize': 100
+        };
+        if (nextPageToken !== undefined) body['pageToken'] = nextPageToken;
+        return fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers: {
+                "Content-type": 'application/json',
+                'Authorization': 'Bearer ' + auth_token
+            }
+        }).then(resp => {
+            if (resp.ok) return resp.json();
+            throw ['get item list err', resp]
+        }).then(json => {
+            if (!isMediaItemsSearchResp(json)) throw ['get item list body err', json];
+            return json;
+        })
+    }
+
+    static async getItemListInAlbum(auth_token: string, albumId: string, loggerFunc?: (arg: string) => void): Promise<MediaItem[]> {
+        let result: MediaItem[] = [];
+        let resp: MediaItemsSearchResp;
+        let nextPageToken: string | undefined = undefined;
+        let page = 1;
+        if (loggerFunc === undefined) loggerFunc = () => {
+        };
+        do {
+            loggerFunc('get page ' + page);
+            if (nextPageToken === undefined || nextPageToken === "") {
+                resp = await this.getItemListInAlbumOnePage(auth_token, albumId)
+            } else {
+                resp = await this.getItemListInAlbumOnePage(auth_token, albumId, nextPageToken)
+            }
+            resp.mediaItems.forEach(item => result.push(item));
+            nextPageToken = resp.nextPageToken;
+            page++;
+        } while (nextPageToken !== undefined && nextPageToken !== '');
+        return result;
+    }
+
+    static async diffAlbum(auth_token: string, albumId_a: string, albumId_b: string, loggerFunc?: (arg: string) => void)
+        : Promise<{ AOnly: MediaItem[]; BOnly: MediaItem[] }> {
+        if (loggerFunc === undefined) loggerFunc = () => {
+        };
+        let a_only: MediaItem[] = [];
+        loggerFunc("get a");
+        const a = await this.getItemListInAlbum(auth_token, albumId_a, loggerFunc);
+        loggerFunc("album a count: " + a.length);
+        loggerFunc("get b");
+        let b = await this.getItemListInAlbum(auth_token, albumId_b, loggerFunc);
+        loggerFunc("album b count: " + b.length);
+        a.forEach(item => {
+            const b_index = b.findIndex((elm) => elm.id === item.id);
+            if (b_index === -1) {
+                a_only.push(item);
+            } else {
+                b.splice(b_index, 1)
+            }
+        });
+        return {AOnly: a_only, BOnly: b}
+    }
+
+    static copyAlbum(auth_token: string, src_id: string, dist_id: string, updateMsgFunc?: (arg: string) => void): Promise<void> {
+        const logger = updateMsgFunc || function (arg: string) {
+        };
+        logger("token: " + auth_token);
+        logger("src_id: " + src_id);
+        logger("dist_id: " + dist_id);
+        return Promise.reject('まだ実装してません')
+    }
     static getAlbumJson(auth_token: string, next_page_token: string): Promise<RawAlbumList> {
         const query = next_page_token === '' ? '' : '?pageToken=' + next_page_token;
         return fetch(this.ALBUM_URL + query, {
@@ -127,6 +201,7 @@ export interface AlbumData {
     id: string;
     title: string;
     isWriteable: boolean;
+    mediaItemsCount: string;
 }
 
 export interface RawAlbumList {
@@ -134,6 +209,7 @@ export interface RawAlbumList {
         id: string;
         title: string;
         isWriteable?: boolean;
+        mediaItemsCount: string;
     }[];
     nextPageToken: string;
 }

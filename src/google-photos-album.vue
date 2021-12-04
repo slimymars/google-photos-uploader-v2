@@ -13,7 +13,9 @@
         <input v-model="newAlbumName" placeholder="新規アルバム名">
         <button @click="makeNewAlbumBtn" v-bind:disabled="newAlbumBtnDisabled">新規アルバム作成</button>
         <br>
-        <button @click="authClearBtn" v-bind:disabled="authClearBtnDisabled">認証情報クリア</button>
+        <button @click="authClearBtn" v-bind:disabled="authClearBtnDisabled">認証情報クリア</button><br>
+        <AlbumCopy v-bind:album-list="albumList" v-bind:albumListDisabled="albumListDisabled"></AlbumCopy>
+        <AlbumDiff v-bind:album-list="albumList" v-bind:albumListDisabled="albumListDisabled"></AlbumDiff>
         {{ debugMsg }}
     </div>
 </template>
@@ -22,9 +24,13 @@
     import {Component, Vue} from 'vue-property-decorator';
     import {ChromeMenu} from "./chrome_menu";
     import {AlbumData, GooglePhotos} from "./google-photos";
+    import AlbumCopy from "./google-photos-copy-album.vue";
+    import AlbumDiff from "./google-photos-diff-album.vue";
 
 
-    @Component
+    @Component({
+        components: {AlbumCopy, AlbumDiff}
+    })
     export default class GooglePhotosAlbumList extends Vue {
         public albumList: AlbumData[] = [];
         public msg = "アルバムリスト取得ボタンで取得してください";
@@ -42,7 +48,7 @@
             this.newAlbumBtnDisabled = true;
             const token = await ChromeMenu.getToken();
             const newData = await GooglePhotos.createAlbum(token, this.newAlbumName);
-            this.albumList.push({id: newData.id, title: newData.title, isWriteable: newData.isWriteable});
+            this.albumList.push({id: newData.id, title: newData.title, isWriteable: newData.isWriteable, mediaItemsCount: newData.mediaItemsCount});
             this.newAlbumBtnDisabled = false;
         }
         public async onClick() {
@@ -53,18 +59,27 @@
             this.addBtnDisabled = true;
 
             this.albumList = [];
-            const token = await ChromeMenu.getToken();
-            // ToDo: このあたりgoogle-photos.tsに移動したいけど、this.albumList.pushをうまいことする方法がわからん
-            let nextPageToken = '';
-            do {
-                const json_data = await GooglePhotos.getAlbumJson(token, nextPageToken);
-                // this.debugMsg = this.debugMsg + JSON.stringify(json_data);
-                json_data.albums.forEach(value => {
-                    const data = <AlbumData>{id: value.id, title: value.title, isWriteable: value.isWriteable};
-                    this.albumList.push(data);
-                });
-                nextPageToken = json_data.hasOwnProperty('nextPageToken') ? json_data.nextPageToken : '';
-            } while (nextPageToken !== '');
+            try {
+                const token = await ChromeMenu.getToken();
+                // ToDo: このあたりgoogle-photos.tsに移動したいけど、this.albumList.pushをうまいことする方法がわからん
+                let nextPageToken = '';
+                do {
+                    const json_data = await GooglePhotos.getAlbumJson(token, nextPageToken);
+                    // this.debugMsg = this.debugMsg + JSON.stringify(json_data);
+                    json_data.albums.forEach(value => {
+                        const data: AlbumData = {
+                            id: value.id,
+                            title: value.title,
+                            isWriteable: value.isWriteable ? value.isWriteable : false,
+                            mediaItemsCount: value.mediaItemsCount
+                        };
+                        this.albumList.push(data);
+                    });
+                    nextPageToken = json_data.hasOwnProperty('nextPageToken') ? json_data.nextPageToken : '';
+                } while (nextPageToken !== '');
+            } catch (e) {
+                alert("アルバムリストの取得に失敗しました: " + e);
+            }
             this.albumBtnMsg = "アルバムリスト再取得";
             this.albumBtnDisabled = false;
             this.albumListDisabled = false;

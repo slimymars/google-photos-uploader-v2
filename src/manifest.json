@@ -2,13 +2,13 @@
   "name": "Google Photosにアップロードするやつ",
   "version": "2.0.0",
   "description": "Google PhotosにWeb上の画像をアップロードするやつ",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArAYfJte6us4u9MO7j3EQQFTxjVXoHm0Utp4BnvjH1HFO0fnpRsYL3DWCAxO0+DF9NEOCTXf7JOOnWj+uaYvy6wVEAoWFKm2H1aa2fjtUdr2pz1R1EAe7cIF+EUlieJjPFNyPhsXdcJBtviIFBTbWDlp/DTtSfmWZjWO/XbFyPPh/mctGlY0iT7l/UU8PAhTt3WOyrVfOYKyQ6vg5r2xqQpoy49uww7we3M4qfqc0wPQ0gSiTp97GKjkt751UwzAzzoJXab5fR07ysUUo4alJNnAaKvmaxDmxMOEGMMlrvunpCmJc06wI5xx0bp5UoE0lnH9cqOSEITKBFV3h0dyZDwIDAQAB",
   "background": {
     "scripts": [
       "background.js"
     ],
     "persistent": false
   },
-  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo+WFXrKPOmmh7bjJNkcrLGjKFoYPQzeO2/9O0OgUWzDcD+vFUlA8vnqq5G4J+LhCHmhzrqlzO84q9HuPVukURjwpQmlYBli4phIYyOxMvRadxNcrQ9MGn0uSYQFibI3ihPOYZf6BbDu6CEuiZWiG9f/OS6CZdJyk/e44VOA//+jWJ3Ed7LuCaeN8FKdAGchTF8KsApigopnO7xkuWuPIZ11wwtGF4Y3tMU6myxHr88EIrs2dTCfNtb+IZ+XdDg/2vlYn+MLu1HPYgc7q6yzg+MUNWXXyqbBaUzdRUDabPNJeJjDVzhbnPSsOfxxCeil6cmEmUUgdMWe3vQeK5FCukQIDAQAB",
   "permissions": [
     "identity",
     "contextMenus",

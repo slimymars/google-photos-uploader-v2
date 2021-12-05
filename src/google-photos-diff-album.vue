@@ -4,21 +4,21 @@
         <label for="diff-src-selector">比較元:</label>
         <select v-model="src" v-bind:disabled="albumListDisabled" id="diff-src-selector">
             <option disabled value="">比較元を選択</option>
-            <option v-for="album in albumList" :value="album">{{ album.title }} {{ album.isWriteable ? '' : "(書込不可)"}} {{ album.mediaItemsCount }}</option>
+            <option v-for="album in albumList" :key="album.id" :value="album">{{ album.title }} {{ album.isWriteable ? '' : "(書込不可)"}} {{ album.mediaItemsCount }}</option>
         </select>
         <label for="diff-dist-selector">比較先:</label>
         <select v-model="dist" v-bind:disabled="albumListDisabled" id="diff-dist-selector">
             <option disabled value="">比較先を選択</option>
-            <option v-for="album in albumList" :value="album">{{ album.title }} {{ album.isWriteable ? '' : "(書込不可)"}} {{ album.mediaItemsCount }}</option>
+            <option v-for="album in albumList" :key="album.id" :value="album">{{ album.title }} {{ album.isWriteable ? '' : "(書込不可)"}} {{ album.mediaItemsCount }}</option>
         </select>
         <button @click="DiffStart" :disabled="DiffBtnDisabled">比較</button><br>
         <label for="diff-logger">ログ</label>
         <ul id="diff-logger">
-            <li v-for="msg in msgs">{{ msg }}</li>
+            <li v-for="(msg, index) in msgs" :key="index">{{ msg }}</li>
         </ul>
         <label for="diff-result">比較結果 (比較元にしか無いものを出力します)</label>
         <ul id="diff-result">
-            <li v-for="item in result"><a :href="item.productUrl"><img :src="item.productUrl" :alt="item.id"><br>
+            <li v-for="(item, index) in result" :key="index"><a :href="item.productUrl"><img :src="item.productUrl" :alt="item.id"><br>
                 {{ item.id }} : {{item.description}}</a></li>
         </ul>
     </div>

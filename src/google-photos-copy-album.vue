@@ -4,12 +4,12 @@
         <label for="src-selector">移行元:</label>
         <select v-model="src" v-bind:disabled="albumListDisabled" id="src-selector">
             <option disabled value="">コピー元を選択</option>
-            <option v-for="album in albumList" :value="album">{{ album.title }} {{ album.isWriteable ? '' : "(書込不可)"}}</option>
+            <option v-for="album in albumList" :key="album.id" :value="album">{{ album.title }} {{ album.isWriteable ? '' : "(書込不可)"}}</option>
         </select>
         <label for="dist-selector"> → 移行先:</label>
         <select v-model="dist" v-bind:disabled="albumListDisabled" id="dist-selector">
             <option disabled value="">コピー先を選択</option>
-            <option v-for="album in writableAlbumList" :value="album">{{ album.title }}</option>
+            <option v-for="album in writableAlbumList" :key="album.id" :value="album">{{ album.title }}</option>
         </select>
         <button @click="CopyStart" :disabled="CopyBtnDisabled">コピー機能は現在使用できません</button><br>
         {{ msg }}

@@ -4,15 +4,14 @@
   "description": "Google PhotosにWeb上の画像をアップロードするやつ",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArAYfJte6us4u9MO7j3EQQFTxjVXoHm0Utp4BnvjH1HFO0fnpRsYL3DWCAxO0+DF9NEOCTXf7JOOnWj+uaYvy6wVEAoWFKm2H1aa2fjtUdr2pz1R1EAe7cIF+EUlieJjPFNyPhsXdcJBtviIFBTbWDlp/DTtSfmWZjWO/XbFyPPh/mctGlY0iT7l/UU8PAhTt3WOyrVfOYKyQ6vg5r2xqQpoy49uww7we3M4qfqc0wPQ0gSiTp97GKjkt751UwzAzzoJXab5fR07ysUUo4alJNnAaKvmaxDmxMOEGMMlrvunpCmJc06wI5xx0bp5UoE0lnH9cqOSEITKBFV3h0dyZDwIDAQAB",
   "background": {
-    "scripts": [
-      "background.js"
-    ],
-    "persistent": false
+    "service_worker": "background.js"
   },
   "permissions": [
     "identity",
     "contextMenus",
-    "storage",
+    "storage"
+  ],
+  "host_permissions": [
     "http://*/*",
     "https://*/*"
   ],
@@ -23,5 +22,5 @@
     ]
   },
   "options_page": "options.html",
-  "manifest_version": 2
+  "manifest_version": 3
 }

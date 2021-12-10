@@ -78,7 +78,7 @@
                     nextPageToken = json_data.hasOwnProperty('nextPageToken') ? json_data.nextPageToken : '';
                 } while (nextPageToken !== '');
             } catch (e) {
-                alert("アルバムリストの取得に失敗しました: " + e);
+                console.log("アルバムリストの取得に失敗しました: " + e);
             }
             this.albumBtnMsg = "アルバムリスト再取得";
             this.albumBtnDisabled = false;

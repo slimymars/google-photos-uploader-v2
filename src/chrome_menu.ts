@@ -61,6 +61,19 @@ export class ChromeMenu {
             .then(obj => obj[key])
     }
 
+    static localStorageAllGet(): Promise<any> {
+        return new Promise<any>(resolve => chrome.storage.local.get(null, resolve))
+    }
+    static localStorageImport(json_data: string): Promise<void> {
+        return new Promise<void>((resolve) => chrome.storage.local.clear(resolve))
+        .then(() => {
+            const data = JSON.parse(json_data);
+            return new Promise<void>((resolve) =>{
+                chrome.storage.local.set(data, resolve);
+            })
+        });
+    }
+
     static getChromeMenu(): Promise<MenuItem[]> {
         return this.localStorageGet('menuItem')
             .then(obj => obj === undefined ? [] : <MenuItem[]>obj)

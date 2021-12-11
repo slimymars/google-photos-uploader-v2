@@ -34,6 +34,13 @@
             })
         }
 
+        public reloadList() {
+            this.list.splice(0, this.list.length);
+            ChromeMenu.getChromeMenu().then((result) => {
+                result.forEach((i) => this.list.push(i))
+            })
+        }
+
         public pushMsg(msg: string) {
             if (this.msgClearTimeoutId !== null) {
                 clearTimeout(this.msgClearTimeoutId)

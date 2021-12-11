@@ -1,7 +1,7 @@
 <template>
     <div id="options">
         <MenuList ref="menu"></MenuList>
-        <GooglePhotosAlbumList v-on:add-btn="addItemToMenuList"></GooglePhotosAlbumList>
+        <GooglePhotosAlbumList v-on:add-btn="addItemToMenuList" @reloadMenu="reloadMenuList"></GooglePhotosAlbumList>
     </div>
 </template>
 
@@ -23,6 +23,10 @@
 
         public addItemToMenuList(obj: { id: string; title: string }) {
             this.$refs.menu.addItem(obj.id, obj.title)
+        }
+
+        public reloadMenuList() {
+            this.$refs.menu.reloadList()
         }
     }
 

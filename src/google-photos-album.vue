@@ -14,9 +14,11 @@
         <button @click="makeNewAlbumBtn" v-bind:disabled="newAlbumBtnDisabled">新規アルバム作成</button>
         <br>
         <button @click="authClearBtn" v-bind:disabled="authClearBtnDisabled">認証情報クリア</button><br>
-        <AlbumCopy v-bind:album-list="albumList" v-bind:albumListDisabled="albumListDisabled"></AlbumCopy>
-        <AlbumDiff v-bind:album-list="albumList" v-bind:albumListDisabled="albumListDisabled"></AlbumDiff>
         {{ debugMsg }}
+        <hr />
+        <ImportExport @reloadMenu="reloadMenuList"></ImportExport>
+        <hr />
+        <AlbumDiff v-bind:album-list="albumList" v-bind:albumListDisabled="albumListDisabled"></AlbumDiff>
     </div>
 </template>
 
@@ -26,10 +28,11 @@
     import {AlbumData, GooglePhotos} from "./google-photos";
     import AlbumCopy from "./google-photos-copy-album.vue";
     import AlbumDiff from "./google-photos-diff-album.vue";
+    import ImportExport from './import-export.vue';
 
 
     @Component({
-        components: {AlbumCopy, AlbumDiff}
+        components: {AlbumCopy, AlbumDiff, ImportExport}
     })
     export default class GooglePhotosAlbumList extends Vue {
         public albumList: AlbumData[] = [];
@@ -98,6 +101,10 @@
         public authClearBtn() {
             this.authClearBtnDisabled = true;
             ChromeMenu.authClear().then(() => this.authClearBtnDisabled = false)
+        }
+
+        public reloadMenuList() {
+            this.$emit("reloadMenu");
         }
 
     }

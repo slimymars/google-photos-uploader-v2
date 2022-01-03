@@ -106,25 +106,11 @@ export class GooglePhotos {
         }).then(resp => resp.json()).then(result => <RawAlbumList>result)
     }
 
-    static getImage(imageUrl: string): Promise<Blob> {
-        return fetch(imageUrl, {
-            credentials: 'include',
-            redirect: "follow",
-
-        }).then((resp) => {
-            if (resp.ok) return resp.blob();
-            resp.text().then((err) => console.log('image get err body text', err));
-            throw resp
-        });
-    }
-    static uploadImage(auth_token: string, albumId: string, imageUrl: string): Promise<boolean> {
+    static uploadImage(auth_token: string, albumId: string, image:Blob, fileName: string, description: string): Promise<boolean> {
         console.log('albumId', albumId);
-        console.log('imageUrl', imageUrl);
-        const fileName = imageUrl.slice(imageUrl.lastIndexOf("/") + 1);
         console.log('filename', fileName);
         let uploadToken = '';
-        return this.getImage(imageUrl).then((blob) => {
-            return fetch(this.UPLOAD_URL, {
+        return fetch(this.UPLOAD_URL, {
                 headers: {
                     "Authorization": "Bearer " + auth_token,
                     "Content-type": "application/octet-stream",
@@ -132,9 +118,8 @@ export class GooglePhotos {
                     "X-Goog-Upload-Protocol": "raw"
                 },
                 method: "POST",
-                body: blob
-            })
-        }).then((resp) => {
+                body: image
+            }).then((resp) => {
             if (resp.ok) return resp.text();
             resp.json().then((obj) => console.log("upload err body", obj));
             throw resp
@@ -145,7 +130,7 @@ export class GooglePhotos {
                 "albumId": albumId,
                 "newMediaItems": [
                     {
-                        "description": imageUrl,
+                        "description": description,
                         "simpleMediaItem": {
                             "uploadToken": uploadToken
                         }
@@ -167,7 +152,7 @@ export class GooglePhotos {
             const upObj = {
                 "newMediaItems": [
                     {
-                        "description": imageUrl,
+                        "description": description,
                         "simpleMediaItem": {
                             "uploadToken": uploadToken
                         }

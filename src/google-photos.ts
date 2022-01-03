@@ -106,13 +106,7 @@ export class GooglePhotos {
         }).then(resp => resp.json()).then(result => <RawAlbumList>result)
     }
 
-    static uploadImage(auth_token: string, albumId: string, imageUrl: string): Promise<boolean> {
-        console.log('albumId', albumId);
-        console.log('imageUrl', imageUrl);
-        const fileName = imageUrl.slice(imageUrl.lastIndexOf("/") + 1);
-        console.log('filename', fileName);
-        let uploadToken = '';
-
+    static getImage(imageUrl: string): Promise<Blob> {
         return fetch(imageUrl, {
             credentials: 'include',
             redirect: "follow",
@@ -121,7 +115,15 @@ export class GooglePhotos {
             if (resp.ok) return resp.blob();
             resp.text().then((err) => console.log('image get err body text', err));
             throw resp
-        }).then((blob) => {
+        });
+    }
+    static uploadImage(auth_token: string, albumId: string, imageUrl: string): Promise<boolean> {
+        console.log('albumId', albumId);
+        console.log('imageUrl', imageUrl);
+        const fileName = imageUrl.slice(imageUrl.lastIndexOf("/") + 1);
+        console.log('filename', fileName);
+        let uploadToken = '';
+        return this.getImage(imageUrl).then((blob) => {
             return fetch(this.UPLOAD_URL, {
                 headers: {
                     "Authorization": "Bearer " + auth_token,

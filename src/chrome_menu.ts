@@ -98,7 +98,7 @@ export class ChromeMenu {
         chrome.tabs.create({'url': 'chrome://extensions/?options=' + chrome.runtime.id});
     }
 
-    static addListener(resolv: (albumId: string, imageUrl: string, referrUrl?: string) => void) {
+    static addListener(resolv: (albumId: string, imageUrl: string, tabId?: number) => void) {
         chrome.contextMenus.onClicked.addListener((info, tab) => {
             console.log(info, tab);
             if (this.isMyMenu(info.menuItemId.toString()) === false) return;
@@ -109,7 +109,7 @@ export class ChromeMenu {
                 ChromeMenu.openMenu();
                 return;
             }
-            resolv(albumId, imageUrl, tab?.url);
+            resolv(albumId, imageUrl, tab?.id);
         })
     }
 }

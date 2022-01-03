@@ -10,7 +10,7 @@
     "identity",
     "contextMenus",
     "storage",
-    "tabs"
+    "scripting"
   ],
   "host_permissions": [
     "http://*/*",

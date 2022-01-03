@@ -101,10 +101,10 @@ export class ChromeMenu {
     static addListener(resolv: (albumId: string, imageUrl: string) => void) {
         chrome.contextMenus.onClicked.addListener((info) => {
             console.log(info);
-            if (this.isMyMenu(info.menuItemId) === false) return;
+            if (this.isMyMenu(info.menuItemId.toString()) === false) return;
             if (info.srcUrl === undefined) return;
             const imageUrl = info.srcUrl;
-            const albumId = this.menuIdToAlbumId(info.menuItemId);
+            const albumId = this.menuIdToAlbumId(info.menuItemId.toString());
             if (albumId === "open_menu") {
                 ChromeMenu.openMenu();
                 return;

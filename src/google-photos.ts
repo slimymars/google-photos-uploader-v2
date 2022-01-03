@@ -106,32 +106,18 @@ export class GooglePhotos {
         }).then(resp => resp.json()).then(result => <RawAlbumList>result)
     }
 
-    static uploadImage(auth_token: string, albumId: string, imageUrl: string): Promise<boolean> {
-        console.log('albumId', albumId);
-        console.log('imageUrl', imageUrl);
-        const fileName = imageUrl.slice(imageUrl.lastIndexOf("/") + 1);
-        console.log('filename', fileName);
+    static uploadImage(auth_token: string, albumId: string, imageUrl: string, imageBlob: Blob): Promise<boolean> {
         let uploadToken = '';
-
-        return fetch(imageUrl, {
-            credentials: 'include',
-            redirect: "follow",
-
-        }).then((resp) => {
-            if (resp.ok) return resp.blob();
-            resp.text().then((err) => console.log('image get err body text', err));
-            throw resp
-        }).then((blob) => {
-            return fetch(this.UPLOAD_URL, {
-                headers: {
-                    "Authorization": "Bearer " + auth_token,
-                    "Content-type": "application/octet-stream",
-                    "X-Goog-Upload-File-Name": fileName,
-                    "X-Goog-Upload-Protocol": "raw"
-                },
-                method: "POST",
-                body: blob
-            })
+        const fileName = imageUrl.slice(imageUrl.lastIndexOf("/") + 1);
+        return fetch(this.UPLOAD_URL, {
+            headers: {
+                "Authorization": "Bearer " + auth_token,
+                "Content-type": "application/octet-stream",
+                "X-Goog-Upload-File-Name": fileName,
+                "X-Goog-Upload-Protocol": "raw"
+            },
+            method: "POST",
+            body: imageBlob
         }).then((resp) => {
             if (resp.ok) return resp.text();
             resp.json().then((obj) => console.log("upload err body", obj));

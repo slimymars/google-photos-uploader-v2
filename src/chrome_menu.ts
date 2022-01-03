@@ -1,3 +1,4 @@
+import { component } from 'vue/types/umd';
 import Oauth2 from './oauth';
 
 export class ChromeMenu {
@@ -98,18 +99,21 @@ export class ChromeMenu {
         chrome.tabs.create({'url': 'chrome://extensions/?options=' + chrome.runtime.id});
     }
 
-    static addListener(resolv: (albumId: string, imageUrl: string) => void) {
-        chrome.contextMenus.onClicked.addListener((info) => {
+    static addListener(resolv: (albumId: string, imageUrl: string, tabId: number | undefined) => void) {
+        chrome.contextMenus.onClicked.addListener((info, tab) => {
             console.log(info);
-            if (this.isMyMenu(info.menuItemId) === false) return;
+            console.log(tab);
+
+            if (this.isMyMenu(info.menuItemId.toString()) === false) return;
             if (info.srcUrl === undefined) return;
             const imageUrl = info.srcUrl;
-            const albumId = this.menuIdToAlbumId(info.menuItemId);
+            const albumId = this.menuIdToAlbumId(info.menuItemId.toString());
             if (albumId === "open_menu") {
                 ChromeMenu.openMenu();
                 return;
             }
-            resolv(albumId, imageUrl);
+            const tabId = tab?.id;
+            resolv(albumId, imageUrl, tabId);
         })
     }
 }

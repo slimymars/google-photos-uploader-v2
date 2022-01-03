@@ -9,7 +9,8 @@
   "permissions": [
     "identity",
     "contextMenus",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "host_permissions": [
     "http://*/*",

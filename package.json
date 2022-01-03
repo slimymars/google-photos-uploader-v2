@@ -11,7 +11,7 @@
   "license": "ISC",
   "private": true,
   "devDependencies": {
-    "@types/chrome": "0.0.80",
+    "@types/chrome": "^0.0.171",
     "@types/vue": "^2.0.0",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "^2.1.0",

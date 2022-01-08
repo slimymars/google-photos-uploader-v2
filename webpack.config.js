@@ -7,7 +7,8 @@ module.exports = {
     mode: process.env.NODE_ENV,
     entry: {
         background: './src/background.ts',
-        options: './src/options.ts'
+        options: './src/options.ts',
+        popup: './src/popup.ts'
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -47,6 +48,10 @@ module.exports = {
                 },
                 {
                     from: path.join(__dirname, 'src', 'options.html'),
+                    to: path.join(__dirname, 'dist')
+                },
+                {
+                    from: path.join(__dirname, 'src', 'popup.html'),
                     to: path.join(__dirname, 'dist')
                 },
                 {
